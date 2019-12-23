@@ -1,0 +1,14 @@
+
+@font-face {
+  font-family: "Rajdhani";
+  src: local("Rajdhani-Regular"), url("Rajdhani-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  src: local("Rajdhani-Light"), url("Rajdhani-Light.ttf");
+  font-weight: 200;
+  font-style: normal;
+}
