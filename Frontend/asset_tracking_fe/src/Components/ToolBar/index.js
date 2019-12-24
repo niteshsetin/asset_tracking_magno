@@ -81,7 +81,7 @@ class ToolBar extends Component {
 
     this.state.type === "central" ? doc["room"] = this.state.room : doc["room"] = ""
 
-    fetch('http://localhost:8000/home/add_beacon', {
+    fetch('http://192.168.0.73:8000/home/add_beacon', {
       method: 'post',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(doc)
@@ -90,7 +90,12 @@ class ToolBar extends Component {
     .then( data => {
       console.log(data);
       if (data["success"]) {
-        this.props.toAddData({"name" : this.state.beacon_name, "id": this.state.beacon_id, type:this.state.type});
+        this.props.toAddData({
+                        "name" : this.state.beacon_name, 
+                        "id": this.state.beacon_id, 
+                        "type":this.state.type,
+                        "room":this.state.room
+                      });
       }
       else {
         console.log("Insert error");
@@ -123,8 +128,8 @@ class ToolBar extends Component {
         borderRadius:    "10px",
         backgroundColor: "rgba(224, 203, 203, 0.32)",
         boxShadow:       "0px 4px 4px rgba(0, 0, 0, 0.25)",
-        marginRight : "5px",
-        padding: "10px"
+        marginRight    : "5px",
+        padding:         "10px"
          }}
         >
             <style text="text/css">

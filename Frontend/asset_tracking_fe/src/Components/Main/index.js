@@ -8,8 +8,9 @@ import FilterBar     from  "../FilterBar";
 import SearchTable    from "../SearchTable";
 import MainCanvas     from "../MainCanvas";
 import ToolBar        from "../ToolBar";
-
+import moment from "moment";
 import { Responsive, WidthProvider } from "react-grid-layout";
+import Two from "two";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 
@@ -28,7 +29,7 @@ const HeaderContainer = styled.div`
 
 const Header = styled.div`
   width : 100%;
-  height: 30%;
+  height: fit-content%;
   display:flex;
   justify-content  : start;
   align-items      : center;
@@ -49,6 +50,7 @@ const FilterContainer = styled.div`
   display: flex;
   justify-content : center;
   align-items: center;
+  
 `;
 
 const FilterBox = styled.div`
@@ -113,8 +115,12 @@ const BodyItemRightTopContainer = styled.div`
 const BodyItemRightBottomContainer = styled.div`
   display : flex;
   width : 100%;
-  height : 98%;
+  height : 100%;
   padding: 1%;
+  display: flex;
+  flex-direction: column;
+  justify-content : center;
+  align-items: center;
 `;
 
 export default class Main extends Component {
@@ -129,7 +135,7 @@ export default class Main extends Component {
   }
 
   componentDidMount() {
-    let incoming = fetch("http://localhost:8000/home/")
+    let incoming = fetch("http://192.168.0.73:8000/home")
       .then(data => data.json())
       .then(data => {
         let buffer_1 = [];
@@ -191,9 +197,9 @@ export default class Main extends Component {
     let buffer = []
     for(let i = 0 ; i < data.length; i++) {
       let buf = {
-        entity_1 : data[i]["name"],
-        entity_2 : data[i]["beacon_id"],
-        entity_3 : data[i]["room"]
+        entity_1 : data[i]["beacon_id"],
+        entity_2 : data[i]["room_id"],
+        entity_3 : moment(data[i]["ts"]).format('MMM Do YYYY, h:mm:ss a')
       };
       
       buffer.push(buf);
@@ -236,19 +242,17 @@ export default class Main extends Component {
 
   handleEventFetching = () => {
     this.timeout = setTimeout(() => {
-      fetch(" ")
+      fetch("http://192.168.0.73:8000/home/fetch_events")
       .then( data => data.json() )
       .then( data => {
         if(this.state.events.some(item => data.id === item.id)) return;
         console.log(data);
         let events = this.state.events;
         events.push( data );
-
         this.setState({
           events: events
         }, () =>{
           console.log(this.state.events);
-          
         });
       })
      }, 1000);
@@ -259,7 +263,7 @@ export default class Main extends Component {
       document.body.style = "background:#562533"
       this.handleEventFetching();
       return (
-        <div style={{width : "100%", height: "800px", border:"none"}}>
+        <div style={{width : "100%", height: "fit-content", border:"none"}}>
           <HeaderContainer>
             <Header>
               Asset Tracking
@@ -285,7 +289,7 @@ export default class Main extends Component {
             <BodyItemRightBottomContainer>
             <SearchTable rowData={this.packDataEventListBox(this.state.events)}
                             table_type={"Event List"}
-                            columns={["Name", "ID", "Room"]}
+                            columns={["Beacon ID", "Room", "Time"]}
                             specialComponent={this.specialComponentStatusBar()}/>
               <MainCanvas/>
             </BodyItemRightBottomContainer>
