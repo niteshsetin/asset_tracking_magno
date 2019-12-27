@@ -29,7 +29,7 @@ const RowStyle = styled.div`
   justifyContent:   center;
   alignItems:       center;
   fontFamily:       Rajdhani;
-
+  user-select :     none;
   color:            white;
 
   &:hover {
@@ -89,9 +89,14 @@ export default class SearchTable extends Component {
   }
 
 
+  handleRowClick = (value) => {
+    console.log(value);
+    this.props.handleRowClick(value)
+  }
+
   returnRow = (data) => {
       const rows = data.map( (value, index) =>
-          <RowStyle key={index}>
+          <RowStyle key={index} onClick={() => { this.handleRowClick(value)}} >
             <div style={{display:"flex", justifyContent:"center", alignItems:"center", margin: "10px", width:"100%", fontWeight:"200"}}>
               {value.entity_1}
             </div>
@@ -112,8 +117,6 @@ export default class SearchTable extends Component {
 
             </div>
             }
-
-
           </RowStyle>
       )
       return rows

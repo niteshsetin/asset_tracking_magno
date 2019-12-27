@@ -92,9 +92,9 @@ class ToolBar extends Component {
       if (data["success"]) {
         this.props.toAddData({
                         "name" : this.state.beacon_name, 
-                        "id": this.state.beacon_id, 
-                        "type":this.state.type,
-                        "room":this.state.room
+                        "id":    this.state.beacon_id, 
+                        "type":  this.state.type,
+                        "room":  this.state.room
                       });
       }
       else {

@@ -21,9 +21,7 @@ db_beacons.append(beacons)
 
 event_list = []
 event = {
-  "beacon_id" : 144,
-  "name" : "chool",
-  "room" : 1
+  
 } 
 event_list.append(event)
 
@@ -87,18 +85,56 @@ def fetch_events( request ):
     print ("Wrong method.")
     return JsonResponse({"message": "Wrong method"}, status=403)
 
-def support_getDistance( value ):
-  ratio = -59 - value
-  ratio_linear = pow( 10, ratio/100 )
-  return math.sqrt( ratio_linear )
 
-def supportAngleC( a, b, c ):
-  
+def support_getDistance( value ):
+  ratio = -21 - (value)
+  ratio_linear = pow( 10, (ratio/(10 * 3)) )
+  return ( ratio_linear )
+
+def supportAngleC( a, b, c ):  
   return math.degrees(math.acos( ((a**2) + (b**2) - (c**2)) / (2*a*b)))
 
 def supportArea( a, b, angle ):
-  return ( ((a*b) * (math.degrees( math.sin(angle) ) / 2 )) )
+  return ( ((a*b) * ( math.sin( math.radians(angle) ) / 2)) )
 
+def supportHeight( area, base ):
+  return( (2 * area) / base )
+
+ 
+@csrf_exempt
+def get_room_view( request ):
+  if request.method == "POST":
+    print ("Get Room View Requested")
+    incoming_packet = json.loads(request.body)
+    db = DataBase(9200, "127.0.0.1")   
+    response = db.getRoomData( index_name="event_list", 
+                               room_id=int(incoming_packet["room_id"]),
+                               time = incoming_packet["time_delta"] ) 
+    if response["status_code"] != 200:
+      #response["name"] = db.getEntityData( "central_list", response["data"]["data"][0]["central_id"] )
+      return JsonResponse({"msg" : response["msg"]}, status = response["status_code"])
+    elif response["status_code"] == 200:
+      
+      return JsonResponse({"msg" : "Successfully found results!", "ack" : True, "data" : response}, status=response["status_code"])
+  else:
+    return JsonResponse({"msg" : "Incorrect method requested", "ack" : False}, status = 403)
+
+
+@csrf_exempt
+def get_beacon_view( request ) : 
+  if request.method == "POST":
+    print ("Got beacon view request")
+    incoming_packet = json.loads( request.body )  
+    db = DataBase(9200, "127.0.0.1")
+    response = db.getBeaconData(
+                                  index_name= "event_list", 
+                                  beacon_id = int(incoming_packet["beacon_id"]), 
+                                  time      = incoming_packet["time_delta"] 
+                                  )
+    if response["status_code"] == 200:
+      return JsonResponse( {"msg" : "Successfully found results!", "ack" : True, "data" : response}, status=response["status_code"] )
+    else :
+      return JsonResponse({"msg" : response["msg"], "ack" : False}, status=response["status_code"])
 
 
 @csrf_exempt
@@ -106,32 +142,51 @@ def add_event( request ):
   global event
   if request.method == "POST":
     print ("Event add posted.")
-    
     incoming_event = json.loads(request.body)
-    if incoming_event["beacon_id"] == 0:
-      #Checking for existence of beacon ID.
 
+    if incoming_event["beacon_id"] == 0:
+      # Checking for existence of beacon ID.
       JsonResponse({"ack" : False, "message" : "False Beacon ID"}, status=414)
+
     if incoming_event["room_id"] == 0:
       #Checking for existence of Room ID.
-
       JsonResponse({"ack" : False, "message" : "False Room ID"}, status=414)
-    from datetime import datetime
+
+    from   datetime        import datetime
     import dateutil
-    from dateutil.parser import parse
+    from   dateutil.parser import parse
+    
     event = incoming_event
-    event["ts"] = (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") ).isoformat())
-    pprint(event)
-    pprint("Relative_dist: " + str(100*(support_getDistance(incoming_event["dist_relative"]))))
-    pprint("Sentinal_dist: " + str(100*(support_getDistance(incoming_event["dist_sentinal"]))))
-    pprint("Slave_dist: " + str(100*(support_getDistance(incoming_event["dist_slave"]))))
-    angleC = (supportAngleC( round(100*(support_getDistance(incoming_event["dist_slave"])), 2), 
-                                           round(100*(support_getDistance(incoming_event["dist_relative"])), 2),
-                                           round(100*(support_getDistance(incoming_event["dist_sentinal"])), 2)  )) 
-    print(angleC)  
-    print( supportArea( round(100*(support_getDistance(incoming_event["dist_slave"])), 2), 
-                        round(100*(support_getDistance(incoming_event["dist_relative"])), 2),
-                        angleC ))                                    
-    return JsonResponse({"ack" : True})
+    event["ts"] = (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%SZ") ).isoformat())
+    pprint("Relative_dist: " + str(1*(support_getDistance(incoming_event["dist_relative"]))))
+    pprint("Sentinal_dist: " + str(1*(support_getDistance(incoming_event["dist_sentinal"]))))
+    pprint("Slave_dist:    " + str(1*(support_getDistance(incoming_event["dist_slave"]))))
+
+    
+    
+    
+
+    event = {
+      "ts"  : (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%SZ") ).isoformat()),
+      "a"   : (support_getDistance(incoming_event["dist_sentinal"])),
+      "b"   : (support_getDistance(incoming_event["dist_slave"])),
+      "c"   : (support_getDistance(incoming_event["dist_relative"])),
+      "room_id" : incoming_event["room_id"],
+      "orientation" : incoming_event["orientation"],
+      "beacon_id"   : incoming_event["beacon_id"],   
+      }
+    pprint( event )
+
+    db  = DataBase(9200, "127.0.0.1")           #Database Connection Instance.
+    res = db.insertEvent("event_list", event )  
+
+    if not res:
+      print("Document index failure")
+      JsonResponse({"ack" : False, "message" : "Document Index Failure"}, status=500)
+
+    else:
+      print ("Document index success")
+      return JsonResponse({"ack" : True, "message" : "Insert success"}, status=200)
+      
   else :
     return JsonResponse({"ack" : False, "message" : "Wrong method"}, status=403)

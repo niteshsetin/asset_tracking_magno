@@ -57,78 +57,77 @@ class FilterBar extends Component {
     this.state = {
       names : [],
       rooms : [],
-      id    : []
+      id    : [],
+      beacons : [],
+      centrals : [],
+      selected_centrals : [],
+      selected_beacons  : []
     };
   };
 
-   handleNameChange = (event) => {
-     let this_ = this;
-     this.setState(
-       {
-         names: event
-       }, ()=> {
-         //console.log(this.state.names);
-         this_.props.handlePropChange( this.state );
-       });
-   };
+
+
+   componentWillReceiveProps(nextProps) {
+     this.setState({
+       beacons : nextProps.options.beacons,
+       centrals : nextProps.options.centrals
+     });
+   }
+
 
    handleRoomChange = (event) => {
      let this_ = this;
+     
      this.setState(
        {
-         rooms: event
+         selected_centrals: event.target.value
        }, ()=> {
          //console.log(this.state.rooms);
-         this_.props.handlePropChange( this.state );
+         //this_.props.handlePropChange( this.state.selected_centrals );
        });
    };
 
-   handleIDChange = (event) => {
+   handleBeaconChange = (event) => {
      let this_ = this;
      this.setState(
        {
-         id: event
+         selected_beacons: event.target.value
        }, ()=> {
          //console.log(this.state.id);
-         this_.props.handlePropChange( this.state );
+         //this_.props.handlePropChange( this.state.selected_beacons );
        });
    };
+
+
+   handleOnCloseBeacons = (event) => {
+     this.props.handlePropChange(this.state.selected_beacons);
+   }
+
+   handleOnCloseCentrals = (event) => {
+     this.props.handlePropChange(this.state.selected_centrals);
+   }
+
   render(){
     const {classes} = this.props;
 
     return (
       <FilterBox>
         <SelectContainer>
-          <form className={classes.root}>
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="demo-controlled-open-select">Name</InputLabel>
-              <Select
-                 multiple
-                 value={this.state.names}
-                 onChange={event => this.handleNameChange(event.target.value)}
-                 input={<Input id="select-multiple" />}
-              >
-              {
-                this.props.options.names.map((value, index) => (
-                  <MenuItem key={index} value={value}>{value}</MenuItem>
-                ))
-              }
-              </Select>
-            </FormControl>
-          </form>
+
 
           <form className={classes.root}>
             <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="demo-controlled-open-select">ID</InputLabel>
+            <InputLabel htmlFor="demo-controlled-open-select">Beacons</InputLabel>
               <Select
                  multiple
-                 value={this.state.id}
-                 onChange={event => this.handleIDChange(event.target.value)}
+                 value={this.state.selected_beacons}
+                 onChange={event => this.handleBeaconChange(event)}
+                 onClose={event=>this.handleOnCloseBeacons(event)}
                  input={<Input id="select-multiple" />}
               >
               {
-                this.props.options.id.map((value, index) => (
-                  <MenuItem key={index} value={value}>{value}</MenuItem>
+                this.state.beacons.map((value, index) => (
+                  <MenuItem key={index} value={value}>{value.name}</MenuItem>
                 ))
               }
               </Select>
@@ -139,13 +138,14 @@ class FilterBar extends Component {
             <InputLabel htmlFor="demo-controlled-open-select">Room</InputLabel>
               <Select
                  multiple
-                 value={this.state.rooms}
-                 onChange={event => this.handleRoomChange(event.target.value)}
+                 value={this.state.selected_centrals}
+                 onChange={event => this.handleRoomChange(event)}
+                 onClose={event=>this.handleOnCloseCentrals(event)}
                  input={<Input id="select-multiple" />}
               >
               {
-                this.props.options.rooms.map((value, index) => (
-                  <MenuItem key={index} value={value}>{value}</MenuItem>
+                this.state.centrals.map((value, index) => (
+                  <MenuItem key={index} value={value}>{value.room}</MenuItem>
                 ))
               }
               </Select>

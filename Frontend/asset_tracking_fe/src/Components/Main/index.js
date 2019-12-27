@@ -128,9 +128,11 @@ export default class Main extends Component {
     super();
     this.state = {
       data    : [],
-      beacons : [],
-      centrals: [],
-      events  : []
+      beacons : [{}],
+      centrals: [{}],
+      events  : [],
+      eventList : [],
+      event : []
     };
   }
 
@@ -142,8 +144,10 @@ export default class Main extends Component {
         let buffer_2 = [];
 
         this.setState({
+
           centrals: data["centrals"],
-          beacons: data["beacons"]
+          beacons:  data["beacons"],
+          listBoxData : ({"centrals" : data["centrals"], "beacons" : data["beacons"]})
         },() => {
           console.log(( this.state ));
         });
@@ -154,7 +158,80 @@ export default class Main extends Component {
 
   handlePropChange = ( data ) => {
     console.log(data);
+
+    if(data.length === 0) {
+      this.setState({
+        eventList : []
+      })
+      return;
+    }
+
+    let events = [];
+    for(let i = 0; i < data.length; i++) { 
+      if (data[i]["type"] === "beacons") {
+        let doc = {
+          "time_delta" : "6h",
+          "beacon_id"  : parseInt(data[i]["id"])
+        }
+        fetch('http://192.168.0.73:8000/home/fetch_beacon_info', {
+          method: 'post',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(doc)
+        })
+        .then( data => data.json() )
+        .then( data => {
+          if (data["ack"]) {
+            let list = this.state.eventList;
+            list.push(data.data.data);
+            this.setState({
+              eventList : list
+            }, () =>{
+              console.log(this.state.eventList)
+            })
+          }
+          else {
+            console.log("Insert error");
+          }
+          
+        });
+      }
+      else if ( data[i]["type"] === "central") {
+         
+          let doc = {
+            "time_delta" : "7h",
+            "room_id"    : parseInt(data[i]["id"])
+          }
+          fetch('http://192.168.0.73:8000/home/fetch_room_info', {
+            method: 'post',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(doc)
+          })
+          .then( data => data.json() )
+          .then( data => {
+
+            if (data["ack"]) {
+              let events = this.state.eventList;
+              events.push(data.data.data)
+              this.setState({
+                eventList : events
+              }, () =>{
+                console.log(this.state.eventList);
+              })
+            }
+            else {
+              console.log("Insert error");
+            }
+          });
+        };
+        
+        this.setState({
+          eventList : events
+        }, () => {
+          console.log(this.state.eventList);
+        })
+    }
   }
+  
 
 
   specialComponentRSSISignalBar = () => {
@@ -174,19 +251,19 @@ export default class Main extends Component {
       return : JSON object dataframe.
     */
 
-    function returnToken( data, token ) {
+    function returnToken( data, token, token1, token2 ) {
       let buffer = [];
       for(let i = 0; i < data.length; i++) {
-        buffer.push( data[i][token] );
+        buffer.push( data[i][token][token1][token2] );
       };
       return buffer;
     };
 
     let buf = {
-      names : returnToken( data, "name" ),
-      rooms : returnToken( data, "room" ),
-      id    : returnToken( data, "id" )
+      rooms : returnToken( data, "centrals", "id", "room" ),
+      id    : returnToken( data, "beacons", "id", "name" )
     };
+    console.log(buf)
     return buf;
   }
 
@@ -196,22 +273,29 @@ export default class Main extends Component {
     
     let buffer = []
     for(let i = 0 ; i < data.length; i++) {
-      let buf = {
-        entity_1 : data[i]["beacon_id"],
-        entity_2 : data[i]["room_id"],
-        entity_3 : moment(data[i]["ts"]).format('MMM Do YYYY, h:mm:ss a')
-      };
-      
-      buffer.push(buf);
+      for(let j = 0; j < data[i].length; j++) {
+        let buf = {
+          entity_1 : data[i][j]["name"],
+          entity_2 : data[i][j]["rname"],
+          entity_3 : moment(data[i][j]["ts"]).format('MMM Do YYYY, h:mm:ss a'),
+          entity_4 : data[i][j]["orientation"],
+          entity_5 : data[i][j]["a"],
+          entity_6 : data[i][j]["b"],
+          entity_7 : data[i][j]["c"],
+          entity_8 : data[i][j]["beacon_id"],
+          entity_9 : data[i][j]["room_id"]
+        };
+        buffer.push(buf);
+      }
     };
-    
     return buffer;
   }
 
-  packDataListBox = ( data ) => {
+  packDataListBox = ( data, type ) => {
     let buffer = []
     for(let i = 0 ; i < data.length; i++) {
       let buf = {
+        entity_type : type,
         entity_1 : data[i]["name"],
         entity_2 : data[i]["id"],
         entity_3 : data[i]["room"]
@@ -242,26 +326,78 @@ export default class Main extends Component {
 
   handleEventFetching = () => {
     this.timeout = setTimeout(() => {
+      //fetch("http://10.0.0.185:8000/home/fetch_events")
       fetch("http://192.168.0.73:8000/home/fetch_events")
       .then( data => data.json() )
       .then( data => {
-        if(this.state.events.some(item => data.id === item.id)) return;
+        //if(this.state.events.some(item => data.id === item.id)) return;
         console.log(data);
         let events = this.state.events;
-        events.push( data );
+        //events.push( data );
         this.setState({
-          events: events
+          events: data
         }, () =>{
           console.log(this.state.events);
         });
       })
-     }, 1000);
+     }, 10000);
   }
 
+  handleRowClick = ( data ) => {
+    
+    if (data.entity_type === "beacons") {
+      let doc = {
+        "time_delta" : "6h",
+        "beacon_id"    : parseInt(data["entity_2"], 10)
+      }
+      fetch('http://192.168.0.73:8000/home/fetch_beacon_info', {
+        method: 'post',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(doc)
+      })
+      .then( data => data.json() )
+      .then( data => {
+        if (data["ack"]) {
+          console.log(data);
+        }
+        else {
+          console.log("Insert error");
+        }
+      });
+    }
+    else if(data.entity_type === "central") {
+      let doc = {
+        "time_delta" : "6h",
+        "room_id"    : parseInt(data["entity_2"], 10)
+      }
+      fetch('http://192.168.0.73:8000/home/fetch_room_info', {
+        method: 'post',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(doc)
+      })
+      .then( data => data.json() )
+      .then( data => {
+        
+        if (data["ack"]) {
+          console.log(data);
+        }
+        else {
+          console.log("Insert error");
+        }
+      });
+      }
+    }
 
+
+  handleRowClickEvent = (event) =>  {
+    console.log(event);
+    this.setState({
+      event : event
+    })
+  }
   render() {
       document.body.style = "background:#562533"
-      this.handleEventFetching();
+      //this.handleEventFetching();
       return (
         <div style={{width : "100%", height: "fit-content", border:"none"}}>
           <HeaderContainer>
@@ -269,29 +405,38 @@ export default class Main extends Component {
               Asset Tracking
             </Header>
             <FilterContainer>
-              <FilterBar options={this.packDataSelectBoxes(this.state.data)} handlePropChange={this.handlePropChange}>
+              <FilterBar options={(this.state.listBoxData)} handlePropChange={this.handlePropChange}>
               </FilterBar>
             </FilterContainer>
           </HeaderContainer>
           <BodyContainer>
             <BodyItemRightTopContainer>
-              <SearchTable rowData={this.packDataListBox(this.state.beacons)}
+              <SearchTable rowData={this.packDataListBox(this.state.beacons, "beacons")}
                             table_type={"Beacon list"}
                             columns={["Name", "ID"]}
-                            specialComponent={this.specialComponentStatusBar()}/>
-              <SearchTable rowData={this.packDataListBox(this.state.centrals)}
+                            specialComponent={this.specialComponentStatusBar()}
+                            handleRowClick = {this.handleRowClick}
+                            />
+              <SearchTable rowData={this.packDataListBox(this.state.centrals,"central")}
                            table_type={"Central list"}
                            columns={["Name", "ID", "Room"]}
-                           specialComponent={this.specialComponentStatusBar()}/>
+                           specialComponent={this.specialComponentStatusBar()}
+                           handleRowClick = {this.handleRowClick}
+                           />
 
               <ToolBar toAddData={this.handleToAddData}/>
             </BodyItemRightTopContainer>
             <BodyItemRightBottomContainer>
-            <SearchTable rowData={this.packDataEventListBox(this.state.events)}
+            <SearchTable rowData={this.packDataEventListBox(this.state.eventList)}
                             table_type={"Event List"}
                             columns={["Beacon ID", "Room", "Time"]}
-                            specialComponent={this.specialComponentStatusBar()}/>
-              <MainCanvas/>
+                            specialComponent={this.specialComponentStatusBar()}
+                            handleRowClick={this.handleRowClickEvent}
+                            />
+              <MainCanvas 
+                  room_name={this.state.event["entity_2"]}
+                  position={{a : this.state.event["entity_5"], b : this.state.event["entity_6"]}}
+                  orientation={this.state.event["entity_4"]} />
             </BodyItemRightBottomContainer>
           </BodyContainer>
         </div>
