@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import styled from "styled-components";
 
 
+import { motion } from "framer-motion";
+
 
 
 const RowsContainer = styled.div`
@@ -16,25 +18,20 @@ const RowsContainer = styled.div`
   alignItems:     center;
 `;
 
-const RowStyle = styled.div`
+const RowStyle = styled(motion.div)`
   display:          flex;
   width:            95%;
   height:           45px;
   border:           none;
   background-color: rgba(0.1, 0.1, 0.1, 0.1);
-  border-radius:    10px;
+  border-radius:    3px;
   margin:           10px;
   flex-direction:   columns;
-  transition:       0.1s ease;
   justifyContent:   center;
   alignItems:       center;
   fontFamily:       Rajdhani;
   user-select :     none;
   color:            white;
-
-  &:hover {
-   background-color:rgba(0.1, 0.1, 0.1, 0.2);
-  }
 `;
 
 
@@ -42,7 +39,7 @@ const SearchTableContainer  = styled.div`
   height : 260px;
   width  : 100%;
   border  : none;
-  border-radius : 10px;
+  border-radius : 3px;
   background-color : rgba(224, 203, 203, 0.32);
   box-shadow : 0px 4px 4px rgba(0, 0, 0, 0.25);
   display : flex;
@@ -55,6 +52,7 @@ const SearchTableBox = styled.div`
   justify-content : center;
   align-items : center;
   width : 100%;
+  user-select: none;
 `;
 
 
@@ -65,6 +63,7 @@ const SearchTableHeaderContainer = styled.div`
   align-items: center;
   margin-top : 10px;
   width : 100%;
+  user-select: none;
 `;
 
 
@@ -96,7 +95,11 @@ export default class SearchTable extends Component {
 
   returnRow = (data) => {
       const rows = data.map( (value, index) =>
-          <RowStyle key={index} onClick={() => { this.handleRowClick(value)}} >
+          <RowStyle 
+            whileHover={{ backgroundColor:"rgba(255, 255, 255, 0.1)" }}
+            whileTap={{scale:0.99}}
+            transition={{duration:0.2}}
+            key={index} onClick={() => { this.handleRowClick(value)}} >
             <div style={{display:"flex", justifyContent:"center", alignItems:"center", margin: "10px", width:"100%", fontWeight:"200"}}>
               {value.entity_1}
             </div>
@@ -126,7 +129,7 @@ export default class SearchTable extends Component {
     return (
       <SearchTableContainer>
             <SearchTableBox>
-              <div style={{display:"flex", justifyContent:"start", alignItems:"start", color:"white", fontFamily:"Rajdhani", fontFamily:"15px", marginRight:"auto", marginLeft:"10px", padding:"10px"}}>{ this.props.table_type }</div>
+              <div style={{ userSelect:"none", fontSize:"18px", display:"flex", justifyContent:"start", alignItems:"start", color:"white", fontFamily:"Rajdhani", marginRight:"auto", marginLeft:"10px", padding:"10px"}}>{ this.props.table_type }</div>
               <SearchTableHeaderContainer>
                 {
                   this.props.columns.map((value, index) => (

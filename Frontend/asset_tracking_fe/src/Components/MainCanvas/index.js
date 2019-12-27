@@ -141,23 +141,28 @@ export default class MainCanvas extends Component {
     }
   }
 
-  renderRect = () => {
+  renderRect = ( value ) => {
     return (
-      <div style={{width:"100%", height:"100%", padding:"10px", display:"flex", justifyContent: "center", flexDirection:"column", alignItems:"center"}}>
+      <div style={{width:"100%", height:"600px", padding:"10px", display:"flex", justifyContent: "center", flexDirection:"column", alignItems:"center"}}>
         <RoomHeader>
-          {this.props.room_name}
+          {value.rname}
         </RoomHeader>
         <RoomBody ref={"roombody"}>
-          <Beacon
-            animate={{
-              x: this.getRelativePosition( this.props.position )["x"],
-              y: this.getRelativePosition( this.props.position )["y"],
-              rotate : this.props.orientation
-            }}
-            whileTap={{scale:0.9}}
-            whileHover={{scale:1.1, backgroundColor: "green"}}
-            transition={{duration : 0.4}}
-          />
+          {
+            value.map((value2, index2) => (
+              <Beacon
+                animate={{
+                  x: this.getRelativePosition( value2 )["x"],
+                  y: this.getRelativePosition( value2 )["y"],
+                  rotate : value2.orientation
+                }}
+                whileTap={{scale:0.9}}
+                whileHover={{scale:1.1, backgroundColor: "green"}}
+                transition={{duration : 0.4}}
+            />
+            ))
+          }
+
         </RoomBody>
       </div>  
     )
@@ -170,18 +175,23 @@ export default class MainCanvas extends Component {
         id="drawing-canvas"
         style={{  
           width          :"100%",
-          height         :"600px",
+          height         :"fit-content",
           border         :"none",
           boxShadow      :"0px 4px 4px rgba(0, 0, 0, 0.25)",
           backgroundColor:"rgba(224, 203, 203, 0.32)",
           flexDirection : "column",
+          overflowY     : "auto",
+          flexWrap      : "nowrap",
           borderRadius   :"5px",
           margin         :"10px",
           display        : "flex",
           justifyContent : "center"
           }}>
             {
-              this.renderRect()
+              this.props.positions.map((value, index) =>(
+                this.renderRect( value )
+              ))
+              
             }
       </div>
     )

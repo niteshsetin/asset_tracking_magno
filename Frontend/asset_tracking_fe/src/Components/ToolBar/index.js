@@ -125,7 +125,7 @@ class ToolBar extends Component {
         height:          "fit-content",
         width:           "100%",
         border:          "none",
-        borderRadius:    "10px",
+        borderRadius:    "3px",
         backgroundColor: "rgba(224, 203, 203, 0.32)",
         boxShadow:       "0px 4px 4px rgba(0, 0, 0, 0.25)",
         marginRight    : "5px",
@@ -169,15 +169,15 @@ class ToolBar extends Component {
                   </Select>
 
               </form>
-              <input onChange={(e)=> this.handleNameChange(e)} type="text" name="bname" id="bname" placeholder ="Beacon Name" style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "10px", height:"40px",  marginTop:"-10px", color:"white", padding: "20px"}}/>
-              <input onChange={(e)=>this.handleIDChange(e)}    type="text" name="bid" id="bid" placeholder ="Beacon ID" style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "10px", height:"40px",  marginTop:"10px", color:"white", padding:"20px"}}/>
+              <input onChange={(e)=> this.handleNameChange(e)} type="text" name="bname" id="bname" placeholder ="Beacon Name" style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "3px", height:"40px",  marginTop:"-10px", color:"white", padding: "20px"}}/>
+              <input onChange={(e)=>this.handleIDChange(e)}    type="text" name="bid" id="bid" placeholder ="Beacon ID" style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "3px", height:"40px",  marginTop:"10px", color:"white", padding:"20px"}}/>
               
               
               {
                 this.state.type ==="central" ? 
                 <input onChange={(e)=>this.handleRoomChange(e)} 
                       type="text" name="room" id="rid" placeholder="Room" 
-                      style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "10px", height:"40px",  marginTop:"10px", color:"white", padding:"20px"}}/>
+                      style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "3px", height:"40px",  marginTop:"10px", color:"white", padding:"20px"}}/>
                     :
                     <div></div>
               }

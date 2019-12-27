@@ -33,7 +33,7 @@ const FilterBox = styled.div`
   width   : 100%;
   height  : auto;
   background-color: rgba(224, 203, 203, 0.32);
-  border-radius : 5px;
+  border-radius : 3px;
   justify-content : center;
   align-items: center;
   padding: 10px;

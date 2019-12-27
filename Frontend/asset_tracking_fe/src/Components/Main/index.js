@@ -395,6 +395,7 @@ export default class Main extends Component {
       event : event
     })
   }
+
   render() {
       document.body.style = "background:#562533"
       //this.handleEventFetching();
@@ -411,32 +412,34 @@ export default class Main extends Component {
           </HeaderContainer>
           <BodyContainer>
             <BodyItemRightTopContainer>
-              <SearchTable rowData={this.packDataListBox(this.state.beacons, "beacons")}
-                            table_type={"Beacon list"}
-                            columns={["Name", "ID"]}
-                            specialComponent={this.specialComponentStatusBar()}
-                            handleRowClick = {this.handleRowClick}
+              <SearchTable 
+                  rowData={this.packDataListBox(this.state.beacons, "beacons")}
+                  table_type={"Beacon list"}
+                  columns={["Name", "ID"]}
+                  specialComponent={this.specialComponentStatusBar()}
+                  handleRowClick = {this.handleRowClick}
                             />
-              <SearchTable rowData={this.packDataListBox(this.state.centrals,"central")}
-                           table_type={"Central list"}
-                           columns={["Name", "ID", "Room"]}
-                           specialComponent={this.specialComponentStatusBar()}
-                           handleRowClick = {this.handleRowClick}
+              <SearchTable 
+                    rowData={this.packDataListBox(this.state.centrals,"central")}
+                    table_type={"Central list"}
+                    columns={["Name", "ID", "Room"]}
+                    specialComponent={this.specialComponentStatusBar()}
+                    handleRowClick = {this.handleRowClick}
                            />
-
               <ToolBar toAddData={this.handleToAddData}/>
             </BodyItemRightTopContainer>
             <BodyItemRightBottomContainer>
-            <SearchTable rowData={this.packDataEventListBox(this.state.eventList)}
-                            table_type={"Event List"}
-                            columns={["Beacon ID", "Room", "Time"]}
-                            specialComponent={this.specialComponentStatusBar()}
-                            handleRowClick={this.handleRowClickEvent}
+            <SearchTable 
+                    rowData={this.packDataEventListBox(this.state.eventList)}
+                    table_type={"Event List"}
+                    columns={["Beacon ID", "Room", "Time"]}
+                    specialComponent={this.specialComponentStatusBar()}
+                    handleRowClick={this.handleRowClickEvent}
                             />
               <MainCanvas 
-                  room_name={this.state.event["entity_2"]}
-                  position={{a : this.state.event["entity_5"], b : this.state.event["entity_6"]}}
-                  orientation={this.state.event["entity_4"]} />
+                  
+                  positions={this.state.eventList}
+                   />
             </BodyItemRightBottomContainer>
           </BodyContainer>
         </div>
