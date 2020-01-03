@@ -11,6 +11,7 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
+
 const styles = theme => ({
   root: {
    display: "flex",
@@ -44,7 +45,8 @@ const SelectContainer = styled.div`
   height : 80%;
   display : flex;
   flex-direction : row;
-  justify-content : center;
+  padding: 10px;
+  justify-content : space-evenly;
   align-items : center;
   ${media.phone`
     flex-direction : column;
@@ -107,14 +109,16 @@ class FilterBar extends Component {
      this.props.handlePropChange(this.state.selected_centrals);
    }
 
+   handleTimeChange = (event) => {
+    this.props.handleTimeDelta( event.target.value )
+   }
+
   render(){
     const {classes} = this.props;
 
     return (
       <FilterBox>
         <SelectContainer>
-
-
           <form className={classes.root}>
             <FormControl className={classes.formControl}>
             <InputLabel htmlFor="demo-controlled-open-select">Beacons</InputLabel>
@@ -151,6 +155,10 @@ class FilterBar extends Component {
               </Select>
             </FormControl>
           </form>
+          <input onChange={(e)=>this.handleTimeChange(e)}    
+                 type="text" name="bid" id="bid" 
+                 placeholder ="Time" 
+                 style={{backgroundColor:"rgba(0.1, 0.1, 0.1, 0.1)", border:"none", borderRadius: "3px", height:"40px",  marginTop:"10px", color:"white", padding:"20px"}}/>
         </SelectContainer>
       </FilterBox>
     )

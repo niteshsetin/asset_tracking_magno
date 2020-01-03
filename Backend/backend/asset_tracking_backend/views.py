@@ -111,6 +111,7 @@ def get_room_view( request ):
                                room_id=int(incoming_packet["room_id"]),
                                time = incoming_packet["time_delta"] ) 
     if response["status_code"] != 200:
+      pprint(response["data"])
       #response["name"] = db.getEntityData( "central_list", response["data"]["data"][0]["central_id"] )
       return JsonResponse({"msg" : response["msg"]}, status = response["status_code"])
     elif response["status_code"] == 200:
@@ -161,10 +162,6 @@ def add_event( request ):
     pprint("Relative_dist: " + str(1*(support_getDistance(incoming_event["dist_relative"]))))
     pprint("Sentinal_dist: " + str(1*(support_getDistance(incoming_event["dist_sentinal"]))))
     pprint("Slave_dist:    " + str(1*(support_getDistance(incoming_event["dist_slave"]))))
-
-    
-    
-    
 
     event = {
       "ts"  : (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%SZ") ).isoformat()),

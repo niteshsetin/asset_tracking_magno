@@ -132,7 +132,8 @@ export default class Main extends Component {
       centrals: [{}],
       events  : [],
       eventList : [],
-      event : []
+      event : [],
+      time_delta : ""
     };
   }
 
@@ -156,10 +157,16 @@ export default class Main extends Component {
     }
 
 
-  handlePropChange = ( data ) => {
-    console.log(data);
+    handleTimeDelta = (data) => {
+    this.setState({
+      time_delta : data
+    })
+  }
 
-    if(data.length === 0) {
+  handlePropChange = ( incoming ) => {
+    console.log(incoming);
+
+    if(incoming.length === 0) {
       this.setState({
         eventList : []
       })
@@ -167,11 +174,11 @@ export default class Main extends Component {
     }
 
     let events = [];
-    for(let i = 0; i < data.length; i++) { 
-      if (data[i]["type"] === "beacons") {
+    for(let i = 0; i < incoming.length; i++) { 
+      if (incoming[i]["type"] === "beacons") {
         let doc = {
-          "time_delta" : "6h",
-          "beacon_id"  : parseInt(data[i]["id"])
+          "time_delta" : this.state.time_delta,
+          "beacon_id"  : parseInt(incoming[i]["id"])
         }
         fetch('http://192.168.0.73:8000/home/fetch_beacon_info', {
           method: 'post',
@@ -182,9 +189,9 @@ export default class Main extends Component {
         .then( data => {
           if (data["ack"]) {
             let list = this.state.eventList;
-            list.push(data.data.data);
+            list.push({data: data.data.data, name : incoming[i]["name"]});
             this.setState({
-              eventList : list
+              eventList :  list 
             }, () =>{
               console.log(this.state.eventList)
             })
@@ -195,11 +202,11 @@ export default class Main extends Component {
           
         });
       }
-      else if ( data[i]["type"] === "central") {
+      else if ( incoming[i]["type"] === "central") {
          
           let doc = {
-            "time_delta" : "7h",
-            "room_id"    : parseInt(data[i]["id"])
+            "time_delta" : this.state.time_delta,
+            "room_id"    : parseInt(incoming[i]["id"])
           }
           fetch('http://192.168.0.73:8000/home/fetch_room_info', {
             method: 'post',
@@ -211,12 +218,13 @@ export default class Main extends Component {
 
             if (data["ack"]) {
               let events = this.state.eventList;
-              events.push(data.data.data)
+              events.push({data : data.data.data, name:incoming[i]["room"]});
               this.setState({
-                eventList : events
+                eventList :  events
               }, () =>{
-                console.log(this.state.eventList);
+                console.log( this.state.eventList );
               })
+              
             }
             else {
               console.log("Insert error");
@@ -270,24 +278,25 @@ export default class Main extends Component {
 
 
   packDataEventListBox = (data) => {
-    
+    console.log(data);
     let buffer = []
     for(let i = 0 ; i < data.length; i++) {
-      for(let j = 0; j < data[i].length; j++) {
+      for(let j = 0; j < data[i]["data"].length; j++) {
         let buf = {
-          entity_1 : data[i][j]["name"],
-          entity_2 : data[i][j]["rname"],
-          entity_3 : moment(data[i][j]["ts"]).format('MMM Do YYYY, h:mm:ss a'),
-          entity_4 : data[i][j]["orientation"],
-          entity_5 : data[i][j]["a"],
-          entity_6 : data[i][j]["b"],
-          entity_7 : data[i][j]["c"],
-          entity_8 : data[i][j]["beacon_id"],
-          entity_9 : data[i][j]["room_id"]
+          entity_1 : data[i]["data"][j]["name"],
+          entity_2 : data[i]["data"][j]["rname"],
+          entity_3 : moment(data[i]["data"][j]["ts"]).format('MMM Do YYYY, h:mm:ss a'),
+          entity_4 : data[i]["data"][j]["orientation"],
+          entity_5 : data[i]["data"][j]["a"],
+          entity_6 : data[i]["data"][j]["b"],
+          entity_7 : data[i]["data"][j]["c"],
+          entity_8 : data[i]["data"][j]["beacon_id"],
+          entity_9 : data[i]["data"][j]["room_id"]
         };
         buffer.push(buf);
       }
     };
+    console.log(buffer);
     return buffer;
   }
 
@@ -344,10 +353,10 @@ export default class Main extends Component {
   }
 
   handleRowClick = ( data ) => {
-    
+    console.log(data)
     if (data.entity_type === "beacons") {
       let doc = {
-        "time_delta" : "6h",
+        "time_delta" : this.state.time_delta,
         "beacon_id"    : parseInt(data["entity_2"], 10)
       }
       fetch('http://192.168.0.73:8000/home/fetch_beacon_info', {
@@ -359,6 +368,9 @@ export default class Main extends Component {
       .then( data => {
         if (data["ack"]) {
           console.log(data);
+          this.setState({
+            eventList : [{"data" : data["data"]["data"], name:data.entity_1}]
+          })
         }
         else {
           console.log("Insert error");
@@ -367,7 +379,7 @@ export default class Main extends Component {
     }
     else if(data.entity_type === "central") {
       let doc = {
-        "time_delta" : "6h",
+        "time_delta" : this.state.time_delta,
         "room_id"    : parseInt(data["entity_2"], 10)
       }
       fetch('http://192.168.0.73:8000/home/fetch_room_info', {
@@ -380,6 +392,9 @@ export default class Main extends Component {
         
         if (data["ack"]) {
           console.log(data);
+          this.setState({
+            eventList : [{"data" : data["data"]["data"], name:data.entity_3}]
+          })
         }
         else {
           console.log("Insert error");
@@ -406,7 +421,11 @@ export default class Main extends Component {
               Asset Tracking
             </Header>
             <FilterContainer>
-              <FilterBar options={(this.state.listBoxData)} handlePropChange={this.handlePropChange}>
+              <FilterBar 
+                options={(this.state.listBoxData)} 
+                handlePropChange={this.handlePropChange}
+                handleTimeDelta={this.handleTimeDelta}
+                >
               </FilterBar>
             </FilterContainer>
           </HeaderContainer>

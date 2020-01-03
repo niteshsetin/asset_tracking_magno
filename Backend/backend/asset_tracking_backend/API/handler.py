@@ -102,7 +102,7 @@ class DataBase:
           }
         
         try:
-            rname = self.getEntityData("central_list", int(room_id))["data"] 
+            rname = self.getEntityData("central_list", int(room_id), "room")["data"] 
         except Exception as msg:
           return {
             "status_code"  : 500,
@@ -117,10 +117,11 @@ class DataBase:
           buf["rname"] = rname
           pprint(x["_source"])
           try :
-            res = self.getEntityData("beacon_list", int( x["_source"]["beacon_id"] ))
+            res = self.getEntityData("beacon_list", int( x["_source"]["beacon_id"] ), "name")
             if res["status_code"] != 200:
               pass
             else:
+              
               name = res["data"]
           except Exception as msg:
             return {
@@ -229,7 +230,7 @@ class DataBase:
         }
       name = ""
       try:
-        res = self.getEntityData("beacon_list", int(beacon_id))
+        res = self.getEntityData("beacon_list", int(beacon_id), "name")
         if res["status_code"] != 200:
           pass
         else:
@@ -246,7 +247,7 @@ class DataBase:
         buf = x["_source"]
         buf["name"] = name
         try:
-          res = self.getEntityData( "central_list", int( x["_source"]["room_id"] ) )
+          res = self.getEntityData( "central_list", int( x["_source"]["room_id"] ), "room" )
           if res["status_code"] != 200:
             pass
           else:
@@ -312,7 +313,7 @@ class DataBase:
             return True
        
                        
-    def getEntityData(self, index_name, id):
+    def getEntityData(self, index_name, id, entity):
       if not isinstance(index_name, str):
         return {
           "msg" : "Index name must be string.",
@@ -326,7 +327,7 @@ class DataBase:
 
       query = {
         "_source":{
-          "includes": "name"
+          "includes": ["name", "room"]
         },
         "size" : 1, 
         "query": {
@@ -363,8 +364,10 @@ class DataBase:
           "status_code" : 404
         })
       else:
+        print("Printing name")
+        pprint(response["hits"]["hits"][0]["_source"]["room"])
         return ({
-          "data"        : response["hits"]["hits"][0]["_source"]["name"],
+          "data"        : response["hits"]["hits"][0]["_source"][str(entity)],
           "status_code" : 200
         })
 
@@ -417,7 +420,7 @@ if __name__ == "__main__":
     #print (db.insertDocument("central_list", {"name":"osdsdli", "id":1134341, "room":"toilet"}))
     #pprint(db.getBeaconData("event_list", 12345, "1h"))
     #pprint(db.fetchSpecificEntity("beacon_list"))
-    #pprint(db.getEntityData("beacon_list", 199))
-    pprint(db.getBeaconData("event_list", 2, "12h"))
+    #pprint(db.getEntityData("central_list", 101, "room"))
+    pprint(db.getBeaconData("event_list", 1, "10d"))
     
 

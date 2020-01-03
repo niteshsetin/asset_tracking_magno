@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import { media } from "../../media/media";
+import { withStyles } from "@material-ui/core/styles";
 
-import Konva from "react-dom";
-import {Stage, Layer, Rect, Circle} from "react-konva";
+import moment from "moment";
 import { motion } from "framer-motion";
-
+import Tooltip from '@material-ui/core/Tooltip';
 
 
 
@@ -59,12 +59,26 @@ const Beacon = styled(motion.div)`
 
 const x = [100, 300, 1300];
 const y = [100, 300, 400]
+
+const LightTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: "black",
+    color: 'white',
+    boxShadow: theme.shadows[1],
+    fontSize: 12,
+    fontFamily: "Montserrat"
+  },
+}))(Tooltip);
+
+
 export default class MainCanvas extends Component {
   constructor() {
     super();
   }
 
-  
+  componentWillReceiveProps(nextProps){
+    console.log(nextProps);
+  }
 
   getRelativePosition = ( dist ) => {
     let innerWidth = 480;
@@ -141,15 +155,20 @@ export default class MainCanvas extends Component {
     }
   }
 
-  renderRect = ( value ) => {
+  renderRect = ( value, name ) => {
     return (
       <div style={{width:"100%", height:"600px", padding:"10px", display:"flex", justifyContent: "center", flexDirection:"column", alignItems:"center"}}>
         <RoomHeader>
-          {value.rname}
+          {name}
         </RoomHeader>
         <RoomBody ref={"roombody"}>
+          
           {
             value.map((value2, index2) => (
+              
+              
+              
+              <LightTooltip title={(moment(value2["ts"])).format("YYYY-MM-DD HH:mm:ss")+" : "+ value2["name"] } placement="top-start">
               <Beacon
                 animate={{
                   x: this.getRelativePosition( value2 )["x"],
@@ -160,6 +179,8 @@ export default class MainCanvas extends Component {
                 whileHover={{scale:1.1, backgroundColor: "green"}}
                 transition={{duration : 0.4}}
             />
+            </LightTooltip>
+            
             ))
           }
 
@@ -189,7 +210,7 @@ export default class MainCanvas extends Component {
           }}>
             {
               this.props.positions.map((value, index) =>(
-                this.renderRect( value )
+                this.renderRect( value["data"], value["name"] )
               ))
               
             }
