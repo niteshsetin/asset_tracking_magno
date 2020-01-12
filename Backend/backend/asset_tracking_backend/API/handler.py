@@ -11,6 +11,7 @@
 import time
 from   elasticsearch import Elasticsearch
 from   pprint import pprint
+import pandas as     pd
 class DataBase:
     def __init__(self, port, ip):
         self.port = port
@@ -421,6 +422,11 @@ if __name__ == "__main__":
     #pprint(db.getBeaconData("event_list", 12345, "1h"))
     #pprint(db.fetchSpecificEntity("beacon_list"))
     #pprint(db.getEntityData("central_list", 101, "room"))
-    pprint(db.getBeaconData("event_list", 1, "10d"))
-    
-
+    data = (db.getBeaconData("event_list", 1, "10d"))
+    df = pd.DataFrame( data["data"])
+    print(df.groupby(["room_id"]).first())
+    for x, y in df.groupby(["room_id", "beacon_id"]):
+      buf ={
+        x[0] : y
+      }
+      pprint(buf)

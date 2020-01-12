@@ -156,8 +156,7 @@ export default class Main extends Component {
       
     }
 
-
-    handleTimeDelta = (data) => {
+  handleTimeDelta = (data) => {
     this.setState({
       time_delta : data
     })
@@ -165,7 +164,7 @@ export default class Main extends Component {
 
   handlePropChange = ( incoming ) => {
     console.log(incoming);
-
+    
     if(incoming.length === 0) {
       this.setState({
         eventList : []
@@ -203,40 +202,39 @@ export default class Main extends Component {
         });
       }
       else if ( incoming[i]["type"] === "central") {
-         
-          let doc = {
-            "time_delta" : this.state.time_delta,
-            "room_id"    : parseInt(incoming[i]["id"])
-          }
-          fetch('http://192.168.0.73:8000/home/fetch_room_info', {
-            method: 'post',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify(doc)
-          })
-          .then( data => data.json() )
-          .then( data => {
-
-            if (data["ack"]) {
-              let events = this.state.eventList;
-              events.push({data : data.data.data, name:incoming[i]["room"]});
-              this.setState({
-                eventList :  events
-              }, () =>{
-                console.log( this.state.eventList );
-              })
-              
-            }
-            else {
-              console.log("Insert error");
-            }
-          });
-        };
-        
-        this.setState({
-          eventList : events
-        }, () => {
-          console.log(this.state.eventList);
+        let doc = {
+          "time_delta" : this.state.time_delta,
+          "room_id"    : parseInt(incoming[i]["id"])
+        }
+        fetch('http://192.168.0.73:8000/home/fetch_room_info', {
+          method: 'post',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(doc)
         })
+        .then( data => data.json() )
+        .then( data => {
+
+          if (data["ack"]) {
+            let events = this.state.eventList;
+            events.push({data : data.data.data, name:incoming[i]["room"]});
+            this.setState({
+              eventList :  events
+            }, () =>{
+              console.log( this.state.eventList );
+            })
+            
+          }
+          else {
+            console.log("Insert error");
+          }
+        });
+      };
+      
+      this.setState({
+        eventList : events
+      }, () => {
+        console.log(this.state.eventList);
+      })
     }
   }
   
@@ -405,9 +403,11 @@ export default class Main extends Component {
 
 
   handleRowClickEvent = (event) =>  {
-    console.log(event);
+    
     this.setState({
       event : event
+    }, () => {
+      console.log(event);
     })
   }
 
@@ -456,8 +456,7 @@ export default class Main extends Component {
                     handleRowClick={this.handleRowClickEvent}
                             />
               <MainCanvas 
-                  
-                  positions={this.state.eventList}
+                  positions={this.state.event}
                    />
             </BodyItemRightBottomContainer>
           </BodyContainer>

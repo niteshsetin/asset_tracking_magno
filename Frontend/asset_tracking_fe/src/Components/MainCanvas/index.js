@@ -6,7 +6,8 @@ import { withStyles } from "@material-ui/core/styles";
 import moment from "moment";
 import { motion } from "framer-motion";
 import Tooltip from '@material-ui/core/Tooltip';
-
+import Sketch from "react-p5";
+import { FilledInput } from "@material-ui/core";
 
 
 const RoomHeader = styled.div`
@@ -57,6 +58,9 @@ const Beacon = styled(motion.div)`
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 `;
 
+
+
+
 const x = [100, 300, 1300];
 const y = [100, 300, 400]
 
@@ -74,10 +78,16 @@ const LightTooltip = withStyles(theme => ({
 export default class MainCanvas extends Component {
   constructor() {
     super();
+    this.state = {
+      event : {}
+    }
   }
 
   componentWillReceiveProps(nextProps){
     console.log(nextProps);
+    this.setState({
+      event : nextProps.positions
+    })
   }
 
   getRelativePosition = ( dist ) => {
@@ -155,6 +165,17 @@ export default class MainCanvas extends Component {
     }
   }
 
+
+  setup = (p5, canvasParentRef) => {
+    p5.createCanvas(500, 500).parent(canvasParentRef);
+  }
+
+  draw = p5 => {
+    p5.background(2);
+    p5.fill(255, 255, 255);
+    p5.ellipse(252/10, 526/10, 20 ,20);
+  }
+
   renderRect = ( value, name ) => {
     return (
       <div style={{width:"100%", height:"600px", padding:"10px", display:"flex", justifyContent: "center", flexDirection:"column", alignItems:"center"}}>
@@ -162,29 +183,19 @@ export default class MainCanvas extends Component {
           {name}
         </RoomHeader>
         <RoomBody ref={"roombody"}>
-          
-          {
-            value.map((value2, index2) => (
-              
-              
-              
-              <LightTooltip title={(moment(value2["ts"])).format("YYYY-MM-DD HH:mm:ss")+" : "+ value2["name"] } placement="top-start">
+        <LightTooltip title={(moment(value["ts"])).format("YYYY-MM-DD HH:mm:ss")+" : "+ value["entity_1"] } placement="top-start">
               <Beacon
                 animate={{
-                  x: this.getRelativePosition( value2 )["x"],
-                  y: this.getRelativePosition( value2 )["y"],
-                  rotate : value2.orientation
+                  x      : this.getRelativePosition({a: value["entity_6"], b : value["entity_7"]})["x"],
+                  y      : this.getRelativePosition({a: value["entity_6"], b : value["entity_7"]})["y"],
+                  rotate : value["entity_4"]
                 }}
                 whileTap={{scale:0.9}}
                 whileHover={{scale:1.1, backgroundColor: "green"}}
                 transition={{duration : 0.4}}
             />
-            </LightTooltip>
-            
-            ))
-          }
-
-        </RoomBody>
+            </LightTooltip> 
+        </RoomBody> 
       </div>  
     )
   }
@@ -209,11 +220,8 @@ export default class MainCanvas extends Component {
           justifyContent : "center"
           }}>
             {
-              this.props.positions.map((value, index) =>(
-                this.renderRect( value["data"], value["name"] )
-              ))
-              
-            }
+              this.renderRect(this.state.event, this.state.event["entity_2"])
+            } 
       </div>
     )
   }

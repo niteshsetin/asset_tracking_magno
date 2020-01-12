@@ -138,9 +138,7 @@ export default class SearchTable extends Component {
                   </div>
                   ))
                 }
-               
               </SearchTableHeaderContainer>
-
               <div style={{display:"block",  border:"none",  width:"95%", height:"100%", margin:"10px", overflow:"auto", overflowX:"hidden", justifyContent:"center"}}>
                 {
                   this.returnRow(this.props.rowData)

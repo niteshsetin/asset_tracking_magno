@@ -158,22 +158,19 @@ def add_event( request ):
     from   dateutil.parser import parse
     
     event = incoming_event
-    event["ts"] = (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%SZ") ).isoformat())
-    pprint("Relative_dist: " + str(1*(support_getDistance(incoming_event["dist_relative"]))))
-    pprint("Sentinal_dist: " + str(1*(support_getDistance(incoming_event["dist_sentinal"]))))
-    pprint("Slave_dist:    " + str(1*(support_getDistance(incoming_event["dist_slave"]))))
 
     event = {
       "ts"  : (dateutil.parser.parse( datetime.utcnow().strftime("%Y-%m-%d %H:%M:%SZ") ).isoformat()),
       "a"   : (support_getDistance(incoming_event["dist_sentinal"])),
       "b"   : (support_getDistance(incoming_event["dist_slave"])),
-      "c"   : (support_getDistance(incoming_event["dist_relative"])),
+      "c"   : (support_getDistance(incoming_event["mapped_dist_relative"])),
       "room_id" : incoming_event["room_id"],
       "orientation" : incoming_event["orientation"],
       "beacon_id"   : incoming_event["beacon_id"],   
       }
     pprint( event )
 
+    
     db  = DataBase(9200, "127.0.0.1")           #Database Connection Instance.
     res = db.insertEvent("event_list", event )  
 
